@@ -350,6 +350,8 @@ services:
       - ${DATA_DIR}/nacos/standalone-logs/:/home/nacos/logs
       - ${DATA_DIR}/nacos/plugins/:/home/nacos/plugins
       - ${DATA_DIR}/nacos/conf/application.properties:/home/nacos/conf/application.properties
+    networks:
+      - default
     ports:
       - "9999:9999"
 

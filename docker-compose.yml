@@ -94,20 +94,23 @@ services:
 #    networks:
 #      - default
 
-  # mysql:
-  #   image: mysql:${MYSQL_VERSION}
-  #   container_name: mysql
-  #   ports:
-  #     - "${MYSQL_HOST_PORT}:3306"
-  #   volumes:
-  #     - ${MYSQL_CONF_FILE}:/etc/mysql/conf.d/mysql.cnf:ro
-  #     - ${DATA_DIR}/mysql:/var/lib/mysql/:rw
-  #   restart: always
-  #   networks:
-  #     - default
-  #   environment:
-  #     MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
-  #     TZ: "$TZ"
+  mysql:
+    image: mysql:${MYSQL_VERSION}
+    container_name: mysql
+    ports:
+      - "${MYSQL_HOST_PORT}:3306"
+    volumes:
+      - ${MYSQL_CONF_FILE}:/etc/mysql/conf.d/mysql.cnf:ro
+      - ${DATA_DIR}/mysql:/var/lib/mysql/:rw
+    restart: always
+    networks:
+      - default
+    environment:
+      MYSQL_USER: root
+      MYSQL_PASSWORD: root
+      MYSQL_DATABASE: nacos
+      MYSQL_ROOT_PASSWORD: "${MYSQL_ROOT_PASSWORD}"
+      TZ: "$TZ"
 
 #  mysql5:
 #    image: mysql:${MYSQL5_VERSION}
@@ -324,6 +327,31 @@ services:
 #      - SYS_PTRACE
 #    networks:
 #      - default
+
+nacos:
+  image: nacos/nacos-server:latest
+  container_name: nacos
+  restart: always
+  depends_on:
+    - mysql
+  environment:
+    PREFER_HOST_MODE: hostname #如果支持主机名可以使用hostname,否则使用ip，默认也是ip
+    SPRING_DATASOURCE_PLATFORM: mysql #数据源平台 仅支持mysql或不保存empty
+    MODE: standalone
+    MYSQL_SERVICE_HOST: mysql
+    MYSQL_SERVICE_DB_NAME: nacos
+    MYSQL_SERVICE_PORT: 3306
+    MYSQL_SERVICE_USER: root
+    MYSQL_SERVICE_PASSWORD: root
+    NACOS_APPLICATION_PORT: 9999
+    JVM_XMS: 512m
+    JVM_MMS: 320m
+  volumes:
+    - ${DATA_DIR}/nacos/standalone-logs/:/home/nacos/logs
+    - ${DATA_DIR}/nacos/plugins/:/home/nacos/plugins
+    - ${DATA_DIR}/nacos/conf/application.properties:/home/nacos/conf/application.properties
+  ports:
+    - "9999:9999"
 
 networks:
   default:
